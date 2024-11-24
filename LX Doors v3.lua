@@ -63,13 +63,14 @@ ErrorMessageOut = game:GetService("LogService").MessageOut:Connect(function(Mess
     end
 
 end)
+local friends = {}
 local LocalPlayer = game.Players.LocalPlayer
 local epiklistofpeople = {}
 local LXUser = {}
 local SendChat = game:GetService("TextChatService"):WaitForChild("TextChannels"):WaitForChild("RBXGeneral")
 -- detection thingy
 SendChat:SendAsync("", "Ineedtheepikrespond")
-game:GetService("TextChatService").MessageReceived:Connect(function(yeah)
+local Detection = game:GetService("TextChatService").MessageReceived:Connect(function(yeah)
     if yeah.Metadata == "usinglolhax" then
         if game:GetService("Players")[yeah.TextSource.Name] ~= LocalPlayer.Name then
             game:GetService("Players")[yeah.TextSource.Name]:SetAttribute("USINGLOLHAX", true)
@@ -132,6 +133,24 @@ ExploitSelf:AddToggle("ES_AntiEyes", { Text = "Anti-Eyes", Default = false, Tool
 ExploitSelf:AddToggle("ES_AntiLookman", { Text = "Anti-Lookman", Default = false, Tooltip = "Forces character to look down from the entity 'Lookman'." })
 ExploitSelf:AddToggle("ES_AntiChanedlier", { Text = "Anti-Chandelier", Default = false, Tooltip = "Disallows touching on any fallen chandeliers during the seek chase." })
 ExploitSelf:AddToggle("ES_AntiSeekArms", { Text = "Anti-Seek Arms", Default = false, Tooltip = "Disallows touching on any seek arms during the seek chase." })
+
+
+local ExploitTroll = Tabs.Exploit:AddLeftGroupbox("Trolling")
+ExploitTroll:AddToggle("Spamtoolz", { Text = "Spam others Tools", Default = false, Tooltip = "Will basically use up the other person tools by spamming!" }):AddKeyPicker("Spamtoolz_X", { Default = "G", SyncToggleState = false, Mode = "Hold", Text = "Spam others Tools", NoUI = false, })
+ExploitTroll:AddInput("WhitelistKoolpeople",{Default = "", Numeric = false, Finished = true, ClearTextOnFocus = true, Text = "Whitelist for spamtools", Callback = function() 
+task.spawn(function()   
+    for _,Player in pairs(game.Players:GetPlayers()) do
+        if Value == Player.Name and not plr == LocalPlayer.Name then
+            table.insert(friends, Player.Name)
+            Notify("Whitelistfromspamtools", "Whitelisted!")
+        elseif Value == LocalPlayer.Name then
+            Notify("Whitelistfromspamtools", "failed you tried whitelisting localplayer")
+        else
+            print("sdf")
+            Notify("Whitelistfromspamtools", "Player Not exist!")
+        end
+    end
+end) end, })
 
 local ExploitBypass = Tabs.Exploit:AddRightGroupbox("Bypass")
 ExploitBypass:AddToggle("EB_CrouchSpoof", { Text = "Crouch Spoof", Default = false, Tooltip = "Spoofs crouching, or in other words the game will think you're crouching. Useful for figure rooms." })
@@ -1010,7 +1029,23 @@ end)
 local Connections = {
     game:GetService("RunService").RenderStepped:Connect(function()
         if not (LocalPlayer.Character:FindFirstChild("HumanoidRootPart") and LocalPlayer.Character:FindFirstChild("Collision")) then return end
-
+        if Toggles.Spamtoolz.Value and Options.Spamtoolz_X:GetState() then
+            task.wait()
+            for _,Player in pairs(game.Players:GetPlayers()) do
+                if Player ~= LocalPlayer and Player and not table.find(friendz, Player.Name) then
+                    for _,v in pairs(Player.Backpack:GetChildren()) do
+                        if v.Name ~= "Candle" and v:FindFirstChildWhichIsA("RemoteEvent") then
+                            v:FindFirstChildWhichIsA("RemoteEvent"):FireServer()
+                        end
+                    end
+                    local Tool = Player.Character:FindFirstChildWhichIsA("Tool")
+                    if Tool and Tool.Name ~= "Candle" and Tool:FindFirstChild("Remote") then
+                        Tool.Remote:FireServer()
+                    end
+                end
+            end
+        end
+        -- slightly modified v2 code yea!
         if Toggles.EB_ACManipulate.Value and Options.EB_ACManipulate_K:GetState() then
             LocalPlayer.Character:PivotTo(LocalPlayer.Character:GetPivot() + workspace.CurrentCamera.CFrame.LookVector * Vector3.new(1, 0, 1) * -100)
         end
@@ -1930,6 +1965,7 @@ local Connections = {
                 table.insert(EspTable.Entities, {Highlight, TextLabel})
 
                 if Toggles.GN_Entities.Value and Options.GN_Entities_Options.Value["Rush"] then
+                    print("sdfsdfsdfsdf")
                     Notify("Entity 'Rush' has spawned!", "Find a hiding spot quickly!")
                 end
 
@@ -2733,7 +2769,7 @@ task.spawn(function()
         for _, Connection in Connections do
             Connection:Disconnect()
         end
-
+        Detection:Disconnect()
         ThirdpersonParts:Destroy()
         LXNotifications:Destroy()
         ClonedCollision:Destroy()
